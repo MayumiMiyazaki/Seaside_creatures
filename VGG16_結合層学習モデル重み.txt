@@ -1,0 +1,133 @@
+from tensorflow import keras
+from tensorflow.keras.models import Sequential,Model
+from keras.layers import Activation,Dense,Dropout,Flatten
+from keras.layers import Conv2D,MaxPooling2D
+from keras.optimizers import RMSprop,Adam
+from keras.utils import np_utils
+import numpy as np
+import tensorflow
+from tensorflow.python.keras.applications.vgg16 import VGG16
+from tensorflow.keras import regularizers
+
+
+classes = ["agohaze","akaei","akaeso","akahitode","Akakurage","akasasanohabera",
+"akebonotyoutyouuo","akeusu","Amaobunegai","amehurasi","anaaosa","Andonkurage","aoyagara",
+"Bateira","Bekkougasa","benikaeruankou","benitukeginpo","Beriruisogincyaku",
+
+"bora","Comochiisogincyaku","Daidaiisokaimenn","dainanginpo","dangouo","Dongurigaya",
+"dorome","Ebisugai","Ezokasanekannzasigokai","gangaze","gazami","Ginkakurage","ginyugoi",
+"Gomafunina","gomamongara","gonzui","Habukurage","hakohugu","hanaanago","hanaminokasago",
+"hanaokoze","hanatatu","Haneumihidora","haokoze","hiiragi","Himeisogincyaku","himeji",
+"Himekehadahizaragai","hitoegai","Hizaragai","honbera",
+"honsomewakebera","hosinohaze","hosisasanohabera","houbou","hukuikamuri","huuraityoutyou",
+"huusennumiusi","hyoumondako","Ibarakannzasigokai","iboiwaougigani","Iboyagi","Iramo",
+"irokaerukaeruankou","isidai","Isidatami","isigakidai","Isobana","isogani",
+"isohaze","isokanidamasi","isosuzumedai","itomakihitode","iwagani","jyanomeamehurasi",
+"kaeruankou","kagokakidai","Kaiumihidora","kamisoriuo","Kamogai","kanmuribera",
+"kasago","Katuonoeboshi","Katuonokannmuri","kawahagi","Kehadahizaragai","Kemusihizaragai",
+"Keyarimusi","Kibanatosaka","kiiroiboumiusi","kinmemodoki","kinsenisimoti","kintyakudai",
+"kinubari","kitamakura","kobanhimeji","konohagani","korodai","koshodai","kosujiisimoti",
+"Kubogai","Kumanokogai","kumanomi","kumohaze","kurodai","Kurogaya","kurohosiisimoti",
+"kurohujitubo",
+"kuroisimoti","Kuroisokaimenn","kuromejina","kurosujiumiusi","kusahugu","kyusen",
+"madai","mahitode","mamedako","mamekobusigani","manamako","matoudai","Matubagai",
+"matukasauo","meitidai","mejina","Midorihimomusi","Midoriisogincyaku","migimaki",
+"minamihakohugu","Minohiramusi","minokasago","Misakihimomusi","misugai",
+"mitubosikurosuzumedai","Mizukurage","mongarakawahagi","mukademinoumiusi","Murasakikaimenn",
+"nabeka","Namiisokaimenn","naminohana","nenbutudai","nisikibera","ohagurobera",
+
+"ojisan","okamebunbuku","okinamejina","onikasago","Ootamaumihidora","Ootogetosaka",
+"Ootunohiramusi",
+"Otohimegokai","oyabiltutya","rokusensuzumedai","Sanhachiurokomusi","sazanamiyaltuko",
+"Shirogaya","Simamenoufunegai","sorasuzumedai","subesubemannjyuugani",
+"sui","Sujihosimusimodoki","sukasikasipan",
+"Sunadyawann",
+"suzumedai","syoujingani","takabe","takanohadai","takobera","takonomakura","tanabatauo",
+"Tatejimaisogincyaku","tatejimakintyakudai","tatunoitoko",
+"tatunootosigo","togetyoutyouuo",
+
+"Tokobusi","toragisu","tubamekonosiro","Tumetagai","Tunohiramusi",
+"tuyubera","tyouhan","tyoutyouuo","umadurahagi","Umeboshiisogincyaku",
+"Umihinoki","Uminina","umitengu","Unoasi","Usuhiramusi","Usuhizaragai","utubo",
+"Uzuichimonnji","Yakkokannzasigokai","Yomegakasa","yomehimeji","Yoroiisogincyaku",
+"yotuanakasipan","youjiuo"]
+
+labels = ["アゴハゼ","アカエイ","アカエソ","アカヒトデ","アカクラゲ","アカササノハベラ","アケボノチョウチョウウオ","アケウス",
+           "アマオブネガイ","アメフラシ","アナアオサ","アンドンクラゲ","アオヤガラ","バテイラ","ベッコウガサ","ベニカエルアンコウ",
+           "ベニツケギンポ","ベリルイソギンチャク","ボラ","コモチイソギンチャク","ダイダイイソカイメン", "ダイナンギンポ", "ダンゴウオ",
+           "ドングリガヤ", "ドロメ", "エビスガイ", "エゾカサネカンザシゴカイ", "ガンガゼ", "ガザミ", "ギンカクラゲ", "ギンユゴイ", "ゴマフニナ",
+           "ゴマモンガラ", "ゴンズイ", "ハブクラゲ","ハコフグ" ,"ハナアナゴ", "ハナミノカサゴ","ハナオコゼ", "ハナタツ","ハネウミヒドラ","ハオコゼ",
+           "ヒイラギ",
+           "ヒメイソギンチャク", "ヒメジ", "ヒメケハダヒザラガイ","ヒトエガイ", "ヒザラガイ", "ホンベラ", "ホンソメワケベラ", "ホシノハゼ"
+           "ホシササノハベラ","ホウボウ", "フクイカムリ", "フウライチョウチョウウオ", "フウセンウミウシ", "ヒョウモンダコ", "イバラカンザシゴカイ",
+           "イボイワオウギガニ", "イボヤギ", "イラモ", "イロカエルアンコウ", "イシダイ", "イシダタミ", "イシガキダイ", "イソバナ",
+           "イソガニ", "イソハゼ", "イソカニダマシ", "イソスズメダイ", "イトマキヒトデ", "イワガニ", "ジャノメアメフラシ", "カエルアンコウ",
+           "カゴカキダイ", "カイウミヒドラ", "カミソリウオ", "カモガイ", "カンムリベラ","カサゴ", "カツオノエボシ", 
+           "カツオノカンムリ", "カワハギ", "ケハダヒザラガイ", "ケムシヒザラガイ", "ケヤリムシ", "キバナトサカ", "キイロイボウミウシ",
+           "キンメモドキ", "キンセンイシモチ", "キンチャクダイ", "キヌバリ", "キタマクラ", "コバンヒメジ","コノハガニ", "コロダイ", 
+           "コショウダイ" "コスジイシモチ", "クボガイ", "クマノコガイ" , "クマノミ", "クモハゼ", "クロダイ", "クロガヤ", "クロホシイシモチ",
+           "クロフジツボ", "クロイシモチ", "クロイソカイメン", "クロメジナ", "クロスジウミウシ", "クサフグ", "キュウセン", "マダイ", "マヒトデ",
+           "マメダコ", "マメコブシガニ", "マナマコ", "マトウダイ", "マツバガイ", "マツカサウオ", "メイチダイ", "メジナ", "ミドリヒモムシ",
+           "ミドリイソギンチャク", "ミギマキ", "ミナミハコフグ", "ミノヒラムシ", "ミノカサゴ", "ミサキヒモムシ", "ミスガイ", 
+           "ミツボシクロスズメダイ", "ミズクラゲ", "モンガラカワハギ", "ムカデミノウミウシ", "ムラサキカイメン", "ナベカ", "ナミイソカイメン",
+           "ナミノハナ", "ネンブツダイ", "ニシキベラ", "オハグロベラ", "オジサン", "オカメブンプク","オキナメジナ", "オニカサゴ", "オオタマウミヒドラ", 
+           "オオトゲトサカ", "オオツノヒラムシ", "オトヒメゴカイ", "オヤビッチャ", "ロクセンスズメダイ", "サンハチウロコムシ", "サザナミヤッコ",
+           "シロガヤ", "シマメノウフネガイ", "ソラスズメダイ", "スベスベマンジュウガニ","スイ", "スジホシムシモドキ", 
+           "スカシカシパン","スナジャワン", "スズメダイ",
+           "ショウジンガニ", "タカベ", "タカノハダイ", "タコベラ", "タカノマクラ", "タナバタウオ", "タテジマイソギンチャク",
+           "タテジマキンチャクダイ", "タツノイトコ", "タツノオトシゴ", "トゲチョウチョウウオ", "トコブシ","トラギス", "ツバメコノシロ",
+           "ツメタガイ", "ツノヒラムシ", "ツユベラ","チョウハン", "チョウチョウウオ", "ウマヅラハギ", "ウメボシイソギンチャク",
+           "ウミヒノキ", "ウミニナ", "ウミテング", "ウノアシ", "ウスヒラムシ", "ウスヒザラガイ", "ウツボ", "ウズイチモンジ", "ヤッコカンザシゴカイ",
+           "ヨメガカサ", "ヨメヒメジ", "ヨロイイソギンチャク", "ヨツアナカシパン", "ヨウジウオ"]
+
+
+num_classes = len(classes)
+image_size = 224
+
+#データの読み込み
+
+X_train,X_test,Y_train,Y_test = np.load("./tt224.npy",allow_pickle=True)
+    
+    #X_trainには1ピクセルあたりの数字(0~256)が入ってる,それを0~1に正規化    
+Y_train = np_utils.to_categorical(Y_train,num_classes)#Yには答えが入ってる、正解値をonehotベクトルにする
+Y_test = np_utils.to_categorical(Y_test,num_classes)
+X_train = X_train.astype("float32")/255.0
+X_test = X_test.astype("float32")/255.0
+
+
+#model = model_train(X_train,Y_train)
+#model_eval(model,X_test,Y_test)
+
+#モデルの定義
+model = VGG16(weights='imagenet',include_top=False,input_shape=(image_size,image_size,3))
+
+
+top_model = Sequential()
+top_model.add(Flatten(input_shape=model.output_shape[1:]))
+top_model.add(Dense(256,activation='relu',kernel_regularizer=regularizers.l2(0.01)))
+top_model.add(Dropout(0.5))
+top_model.add(Dense(num_classes,activation='softmax'))
+
+model = Model(inputs=model.input,outputs=top_model(model.output))
+for layer in model.layers[:15]:#0から14まではフリーズ
+    layer.trainable = False
+    
+    
+opt = Adam(lr = 0.0001)
+    
+model.compile(loss='categorical_crossentropy',optimizer=opt,metrics=['accuracy'])
+
+model.save('./iso2_cnn.h5')
+
+
+
+#model.summary()
+
+
+model.fit(X_train,Y_train,batch_size=1,epochs=30,verbose=True)
+
+
+scores = model.evaluate(X_test,Y_test,batch_size=32)
+
+model.save_weights('./iso2_cnn_weights.h5')
+

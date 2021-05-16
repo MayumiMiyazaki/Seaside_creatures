@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!--Import materialize.css-->
+    <!--Compiled and minified CSS-->
+    <link rel ="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-rc.2/css/materialize.min.css">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <!--Import materialize.js-->
+    <!--Compiled and minified JavaScript-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-rc.2/js/materialize.min.js"></script>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <meta charset="utf-8"/>
+    <title>海辺・磯の生き物図鑑</title>
+
+</head>
+<body>
+    <div class="row">
+        <!--header-->    
+        <nav class="nav-wrapper col s12 blue lighten-1">
+            <div class="col offset-s2">
+                <ul>
+                    <li><a href="/" class="white-text">＜海辺・磯の生き物図鑑＞これは何？写真で判定</a></li>
+                    <li><a href="/privacy" class="white-text">利用規約</a></li>
+                    <li><a href="/about" class="white-text">アプリについて</a></li>
+                </ul>
+            </div>
+        </nav>
+        {%block body%}
+        {%endblock%}
+    </div>
+</body>
+</html>

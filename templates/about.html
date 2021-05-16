@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block body %}
+
+<div class="row">
+    <div class="col s2">
+        <button class="btn waves-effect waves-light blue" name="top" onclick="location.href='/'">
+        トップページへ戻る</button>
+        </div>
+    </div>
+
+    <div class="row"> 
+        <div class="col s7 offset-s2">
+            <p><img src="/static/images/result/tatu.png"></p>
+            <h5>＜ご案内＞</h5>
+            <p>このアプリでは砂浜や磯、潮だまりで見かける生物を画像認識により判定しています。</p>
+            <p>魚、クラゲ、カニ、貝、イソギンチャク、虫、海藻など、</p>
+            <p>足元で見つかる身近なものをお試しいただけます。</p>
+            <h5>＜使い方＞</h5>
+            <p>1.写真を選択してください</p>
+            <p>2.表示を押し、写真を確認してください</p>
+            <p>3.予測を押すと、候補が表示されます。名前、確率、毒の有無が分かります。また、虫眼鏡リンクで詳細が分かります。</p>
+        </div>
+    </div>
+
+{% endblock %}
